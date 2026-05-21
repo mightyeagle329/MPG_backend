@@ -10,7 +10,7 @@ async def generate_flyer(address: str, tier: str) -> dict:
 
     design_id = await client.autofill_brand_template(
         brand_template_id=brand_template_id,
-        data={"address": address},
+        data={"Address": address},
     )
     pdf_urls = await client.export_design_as_pdf(design_id)
 
