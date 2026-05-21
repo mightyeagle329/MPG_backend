@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
+from app.canva.client import CanvaClient
 from app.canva.oauth import (
     build_authorize_url,
     exchange_code_for_token,
@@ -50,6 +51,17 @@ async def oauth_callback(
     token = await exchange_code_for_token(code=code, code_verifier=verifier)
     token_store.save(token)
     return {"status": "ok", "message": "Canva connected. You can close this tab."}
+
+
+@app.get("/brand-templates")
+async def list_brand_templates() -> dict:
+    try:
+        access_token = await token_store.get_access_token()
+        client = CanvaClient(access_token)
+        items = await client.list_brand_templates()
+        return {"count": len(items), "items": items}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 class FlyerRequest(BaseModel):

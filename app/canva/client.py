@@ -19,6 +19,15 @@ class CanvaClient:
             "Content-Type": "application/json",
         }
 
+    async def list_brand_templates(self) -> list[dict]:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(
+                f"{CANVA_API_BASE}/brand-templates", headers=self._headers
+            )
+            if resp.status_code >= 400:
+                raise CanvaApiError(f"List brand templates failed: {resp.status_code} {resp.text}")
+            return resp.json().get("items", [])
+
     async def autofill_brand_template(
         self, brand_template_id: str, data: dict[str, str]
     ) -> str:
