@@ -87,7 +87,7 @@ class CanvaClient:
             job = resp.json()["job"]
             status = job.get("status")
             if status == "success":
-                return [url["url"] for url in job["urls"]]
+                return job.get("urls", [])
             if status == "failed":
                 raise CanvaApiError(f"Export job failed: {job.get('error')}")
         raise CanvaApiError("Export job timed out")
