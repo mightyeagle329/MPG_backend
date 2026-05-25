@@ -12,6 +12,7 @@ from app.canva.oauth import (
     token_store,
 )
 from app.flyer.service import generate_flyer
+from app.package.service import generate_package
 
 app = FastAPI(title="Marketing Package Generator - V1")
 
@@ -73,6 +74,34 @@ class FlyerRequest(BaseModel):
 async def create_flyer(req: FlyerRequest) -> dict:
     try:
         return await generate_flyer(address=req.address, tier=req.tier)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class PackageRequest(BaseModel):
+    address: str
+    purchase_price: float
+    seller_contribution: float
+    tier: str
+    credit_score: int = 740
+    county_fips_id: str = "13121"
+    state: str = "GA"
+
+
+@app.post("/package")
+async def create_package(req: PackageRequest) -> dict:
+    try:
+        return await generate_package(
+            address=req.address,
+            purchase_price=req.purchase_price,
+            seller_contribution=req.seller_contribution,
+            tier=req.tier,
+            credit_score=req.credit_score,
+            county_fips_id=req.county_fips_id,
+            state=req.state,
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

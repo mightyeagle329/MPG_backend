@@ -1,0 +1,12 @@
+# Marketing statement templates.
+# Variables available: {address}, {incentive_amount}, {base_rate},
+# {permanent_rate}, {one_one_year1}, {two_one_year1}, {two_one_year2}.
+# Format numbers with two decimals where it makes sense.
+
+statements:
+  - "Special financing available at {address}: lender and seller are offering a combined buyer incentive worth ${incentive_amount:,}."
+  - "Buyers of {address} may qualify for an introductory rate as low as {two_one_year1:.3f}% in year 1 with our 2/1 buydown. Ask for details."
+  - "Lock in long-term savings on {address} with a permanent rate of {permanent_rate:.3f}% using the ${incentive_amount:,} buyer incentive."
+  - "Lower payments in year 1 at {address}: 1/1 buydown drops the rate to {one_one_year1:.3f}% in year 1, then {base_rate:.3f}% from year 2."
+  - "{address} qualifies for our 2/1 buydown program: {two_one_year1:.3f}% year 1, {two_one_year2:.3f}% year 2, {base_rate:.3f}% from year 3."
+  - "Take advantage of a ${incentive_amount:,} buyer incentive on {address}. Permanent and temporary buydown options available."
