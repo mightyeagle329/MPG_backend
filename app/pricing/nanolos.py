@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import httpx
 
 from app.pricing.base import QuoteRequest, QuoteResult
@@ -14,13 +16,18 @@ class NanolosPricingClient:
         self._organization = organization
 
     async def get_quote(self, req: QuoteRequest) -> QuoteResult:
+        closing_date = (date.today() + timedelta(days=30)).isoformat()
+
         params = {
             "amortizationType": "Fixed",
-            "closingDate": "",
+            "closingDate": closing_date,
             "countyFipsId": req.county_fips_id,
             "creditScore": req.credit_score,
             "escrowsWaived": str(req.escrows_waived).lower(),
+            "hasPreviousVALoan": "false",
             "isCashOut": "false",
+            "isVADisabled": "false",
+            "isVeteran": "false",
             "loanAmount": req.loan_amount,
             "loanProductId": req.loan_product_id,
             "loanPurpose": req.loan_purpose,
@@ -45,13 +52,16 @@ class NanolosPricingClient:
 
         rate_details = quote.get("rateDetails", [])
         if not rate_details:
-            raise PricingApiError("Quote returned no rateDetails")
+            raise PricingApiError(
+                f"Quote returned no rateDetails. Full quote: {quote}"
+            )
 
         best = rate_details[0]
+        fees = best.get("feesItemization", {}) or {}
         return QuoteResult(
-            base_rate=float(best.get("apr", 0)),
-            apr=best.get("apr"),
-            total_closing_costs=best.get("totalCosts"),
-            monthly_payment=best.get("pitimi") or best.get("pitmi"),
+            base_rate=float(fees.get("interestRate") or best.get("APR") or 0),
+            apr=fees.get("APR") or best.get("APR"),
+            total_closing_costs=fees.get("totalClosingCosts") or fees.get("BaseLoanAmount"),
+            monthly_payment=fees.get("PITIMI") or fees.get("PIPMI"),
             raw=quote,
         )
