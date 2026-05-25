@@ -45,27 +45,33 @@ class NanolosPricingClient:
                 raise PricingApiError(f"Quote request failed: {resp.status_code} {resp.text}")
             data = resp.json()
 
-        print("=== NANOLOS RAW RESPONSE ===")
-        print(data)
-        print("=== END ===")
-
-        quote = data.get("quote", {})
+        quote = data.get("quote", data)
         errors = quote.get("errors", [])
         if errors:
             raise PricingApiError(f"Quote returned errors: {errors}")
 
         rate_details = quote.get("rateDetails", [])
         if not rate_details:
-            raise PricingApiError(
-                f"Quote returned no rateDetails. Full response: {data}"
-            )
+            raise PricingApiError("Quote returned no rateDetails")
 
-        best = rate_details[0]
-        fees = best.get("feesItemization", {}) or {}
+        best = self._pick_best_rate(rate_details)
+
+        interest_rate_decimal = best.get("InterestRate") or best.get("rate") or 0
+        apr_decimal = best.get("APR") or best.get("apr") or 0
+
         return QuoteResult(
-            base_rate=float(fees.get("interestRate") or best.get("APR") or 0),
-            apr=fees.get("APR") or best.get("APR"),
-            total_closing_costs=fees.get("totalClosingCosts") or fees.get("BaseLoanAmount"),
-            monthly_payment=fees.get("PITIMI") or fees.get("PIPMI"),
-            raw=quote,
+            base_rate=round(float(interest_rate_decimal) * 100, 3),
+            apr=round(float(apr_decimal) * 100, 3),
+            total_closing_costs=best.get("totalCosts"),
+            monthly_payment=best.get("PITIMI") or best.get("PrincipalAndInterestPayment"),
+            raw=best,
+        )
+
+    @staticmethod
+    def _pick_best_rate(rate_details: list[dict]) -> dict:
+        valid = [r for r in rate_details if r.get("IsValid", True)]
+        candidates = valid or rate_details
+        return min(
+            candidates,
+            key=lambda r: float(r.get("APR") or r.get("apr") or 999),
         )
