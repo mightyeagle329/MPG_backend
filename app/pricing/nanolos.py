@@ -39,11 +39,15 @@ class NanolosPricingClient:
             "state": req.state,
         }
 
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
             resp = await client.get(NANOLOS_BASE_URL, params=params)
             if resp.status_code >= 400:
                 raise PricingApiError(f"Quote request failed: {resp.status_code} {resp.text}")
             data = resp.json()
+
+        print("=== NANOLOS RAW RESPONSE ===")
+        print(data)
+        print("=== END ===")
 
         quote = data.get("quote", {})
         errors = quote.get("errors", [])
@@ -53,7 +57,7 @@ class NanolosPricingClient:
         rate_details = quote.get("rateDetails", [])
         if not rate_details:
             raise PricingApiError(
-                f"Quote returned no rateDetails. Full quote: {quote}"
+                f"Quote returned no rateDetails. Full response: {data}"
             )
 
         best = rate_details[0]
