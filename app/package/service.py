@@ -12,7 +12,7 @@ async def generate_package(
     purchase_price: float,
     seller_contribution: float,
     tier: str,
-    credit_score: int = 740,
+    credit_score: int = 760,
     county_fips_id: str = "13121",
     state: str = "GA",
 ) -> dict:
