@@ -1,6 +1,7 @@
 import secrets
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
@@ -15,6 +16,13 @@ from app.flyer.service import generate_flyer
 from app.package.service import generate_package
 
 app = FastAPI(title="Marketing Package Generator - V1")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 _pkce_cache: dict[str, str] = {}
 
