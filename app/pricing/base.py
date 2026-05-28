@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 
@@ -23,6 +23,9 @@ class QuoteResult:
     apr: float | None = None
     total_closing_costs: float | None = None
     monthly_payment: float | None = None
+    # Rate sheet: list of (rate_percent, points_cost) pairs from the pricing API.
+    # Positive points = borrower pays; negative = lender credit.
+    rate_sheet: list[tuple[float, float]] = field(default_factory=list)
     raw: dict | None = None
 
 

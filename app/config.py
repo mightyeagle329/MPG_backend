@@ -8,7 +8,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class IncentiveTier:
     amount: int
     brand_template_id: str
-    permanent_buydown_points: float
 
 
 class Settings(BaseSettings):
@@ -18,9 +17,6 @@ class Settings(BaseSettings):
 
     canva_template_5k: str = ""
     canva_template_10k: str = ""
-
-    permanent_points_5k: float = 1.0
-    permanent_points_10k: float = 2.0
 
     pricing_organization: str = "JasminaKrnjetin1465"
 
@@ -36,12 +32,10 @@ class Settings(BaseSettings):
             "5k": IncentiveTier(
                 amount=5000,
                 brand_template_id=self.canva_template_5k,
-                permanent_buydown_points=self.permanent_points_5k,
             ),
             "10k": IncentiveTier(
                 amount=10000,
                 brand_template_id=self.canva_template_10k,
-                permanent_buydown_points=self.permanent_points_10k,
             ),
         }
         info = mapping.get(tier)

@@ -17,12 +17,13 @@ async def generate_package(
     state: str = "GA",
 ) -> dict:
     tier_info = settings.tier(tier)
+    loan_amount = purchase_price * 0.8
 
     pricing_client = NanolosPricingClient(organization=settings.pricing_organization)
     quote = await pricing_client.get_quote(
         QuoteRequest(
             purchase_price=purchase_price,
-            loan_amount=purchase_price * 0.8,
+            loan_amount=loan_amount,
             credit_score=credit_score,
             county_fips_id=county_fips_id,
             state=state,
@@ -31,7 +32,9 @@ async def generate_package(
 
     buydowns = calculate_buydowns(
         base_rate=quote.base_rate,
-        permanent_points=tier_info.permanent_buydown_points,
+        loan_amount=loan_amount,
+        incentive_amount=tier_info.amount,
+        rate_sheet=quote.rate_sheet,
     )
 
     statements = statement_generator.generate(
@@ -63,6 +66,7 @@ async def generate_package(
         "financing": {
             "base_rate": buydowns.base_rate,
             "permanent": buydowns.permanent_rate,
+            "permanent_points_used": buydowns.permanent_points_used,
             "one_one": {
                 "year1": buydowns.one_one_year1,
                 "year2_plus": buydowns.one_one_year2_plus,
